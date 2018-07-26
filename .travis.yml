@@ -8,4 +8,4 @@ python:
 install:
   - python setup.py -q install
 # command to run tests
-script: pytest --pyargs jerakia
+script: pytest tests
