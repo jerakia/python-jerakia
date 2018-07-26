@@ -8,4 +8,4 @@ def func(x):
     return x + 1
 
 def test_helper():
-    assert func(3) == 5
+    assert func(4) == 5
