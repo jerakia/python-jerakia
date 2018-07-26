@@ -1,0 +1,6 @@
+token: test:fc345358
+scope:
+  env: dev
+
+host: test
+policy: default
