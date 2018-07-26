@@ -9,4 +9,4 @@ python:
   - "pypy2.7"
   - "pypy3.5"
 # command to run tests
-script: pytest
+script: pytest --pyargs jerakia
