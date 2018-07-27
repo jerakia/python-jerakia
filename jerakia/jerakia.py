@@ -96,22 +96,6 @@ class Jerakia(object):
 
         response = requests.get(endpoint_url, params=params, headers=headers)
         if response.status_code == requests.codes.ok:
-          return json.loads(response.text)
+          return json.load(response.json())
         else:
           raise JerakiaError("Bad HTTP response")
-
-    """Raw lookup method for tests"""
-    def rawlookup(self, key, namespace, policy='default', variables=None):
-        endpoint_url = self.lookup_endpoint_url(key=key)
-        namespace_str = '/'.join(namespace)
-        scope = self.scope(variables)
-        options = { 
-            'namespace': namespace_str,
-            'policy': policy,
-        }
-
-        params = self.merge_dict(a=scope,b=options)
-        headers = self.headers()
-
-        response = requests.get(endpoint_url, params=params, headers=headers)
-        return response.json()

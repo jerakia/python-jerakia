@@ -8,32 +8,29 @@ class JerakiaTestCase(unittest.TestCase):
 
     def setUp(self):
         self.jerakia = Jerakia(os.path.abspath('utils/jerakia.yaml'))
-
-    @mock.patch('jerakia.jerakia.requests.get')
-    def test_get_ok(self, mock_lookup):
-        """
-        Test getting a 200 OK response from the lookup method of Jerakia.
-        """
-        # Construct mock response object
-        mock_response = mock.Mock()
-        expected_dict = {
-            "ports": [
-                "80",
-                "443",
-            ]
-        }
-
-        mock_response.json.return_value = expected_dict
-
-        # Assign our mock response as the result of patched function
-        mock_lookup.return_value = mock_response
-        key='port'
-        namespace='common'
-        response_dict = self.jerakia.rawlookup(key=key,namespace=namespace)
     
-        # Check that our function made the expected internal calls
-        mock_lookup.assert_called_once_with(key=key,namespace=namespace)
-        self.assertEqual(1, mock_response.json.call_count)
+    def mocked_requests_get(self, *args, **kwargs):
+        class MockResponse:
+            def __init__(self, json_data, status_code):
+                self.json_data = json_data
+                self.status_code = status_code
+            def json(self):
+                return self.json_data
 
+        return MockResponse({"found": "true","payload": "sto"}, 200)
+
+    @mock.patch('jerakia.jerakia.requests.get', side_effect=mocked_requests_get)
+    @mock.patch('jerakia.jerakia.json.load', side_effect=(lambda x: x))
+    def test_get_ok(self,mock_lookup,mock_json):
+        """
+        Test getting same dict response as expected from lookup
+        """
+        expected_dict = {
+            "found": "true",
+            "payload": "sto"
+        }
+        key='port'
+        namespace=['common']
+        response_dict = self.jerakia.lookup(key=key,namespace=namespace)
         # Check the contents of the response
         self.assertEqual(response_dict, expected_dict)
