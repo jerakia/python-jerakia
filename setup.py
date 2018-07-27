@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='jerakia',
-    version='0.1.4',
+    version='0.1.5',
     packages=['jerakia'],
     include_package_data=True,
     description='Jerakia module',

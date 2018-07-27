@@ -100,7 +100,7 @@ class Jerakia(object):
         else:
           raise JerakiaError("Bad HTTP response")
 
-    """Lookup test"""
+    """Raw lookup method for tests"""
     def rawlookup(self, key, namespace, policy='default', variables=None):
         endpoint_url = self.lookup_endpoint_url(key=key)
         namespace_str = '/'.join(namespace)
@@ -114,4 +114,4 @@ class Jerakia(object):
         headers = self.headers()
 
         response = requests.get(endpoint_url, params=params, headers=headers)
-        return response
+        return response.json()
