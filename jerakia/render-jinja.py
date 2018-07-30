@@ -7,10 +7,14 @@ import os
 from jinja2 import Environment, FileSystemLoader, Template
 from jerakia import Jerakia,JerakiaError
 
-def render(template_path, data, extensions=None, strict=False):
-    """Renders a jinja2 template using data looked up via Jerakia
+jerakia = Jerakia(None)
 
-    """
+def render(template_path, configfile_path, data, extensions=None, strict=False):
+    """Renders a jinja2 template using data looked up via Jerakia"""
+    
+    if jerakia.get_config is None:
+        jerakia.set_config(configfile_path)
+
     if extensions is None:
         extensions = []
     env = Environment(
@@ -33,7 +37,6 @@ def retrieveJerakia(item):
     lookuppath =item.split('/')
     key = lookuppath.pop()
     namespace = lookuppath
-    jerakia = Jerakia(os.path.abspath('seter/jerakia.yaml'))
     ret = []
     response = jerakia.lookup(key=key, namespace=namespace)
     ret.append(response['payload'])

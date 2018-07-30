@@ -20,8 +20,17 @@ class JerakiaError(Error):
 
 class Jerakia(object):
     """Constructor."""
-    def __init__(self,configfile):
-        self.config = self.get_config(configfile)
+    def __init__(self,configfile=None):
+        if configfile is None:
+            self.config = None
+        else:
+            self.config = self.combined_config(configfile)
+
+    def set_config(self, configfile):
+        self.config=self.combined_config(configfile)
+    
+    def get_config(self):
+        return self.config
 
     """Default coniguration"""
     def config_defaults(self):
@@ -40,7 +49,7 @@ class Jerakia(object):
         return a
 
     """Retrieve coniguration"""
-    def get_config(self, configfile):
+    def combined_config(self, configfile):
         defaults = self.config_defaults()
 
         if os.path.isfile(configfile):
