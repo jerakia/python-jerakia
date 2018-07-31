@@ -15,7 +15,7 @@ class JerakiaTestCase(unittest.TestCase):
             def __init__(self, json_data, status_code):
                 self.json_data = json_data
                 self.status_code = status_code
-                MockResponse.text = str(json_data)
+                MockResponse.text = json_data
 
         return MockResponse({"found": "true","payload": "sto"}, 200)
 
