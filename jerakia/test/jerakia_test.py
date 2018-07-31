@@ -20,7 +20,7 @@ class JerakiaTestCase(unittest.TestCase):
         return MockResponse({"found": "true","payload": "sto"}, 200)
 
     @mock.patch('jerakia.jerakia.requests.get', side_effect=mocked_requests_get)
-    @mock.patch('jerakia.jerakia.json.load', side_effect=(lambda x: x))
+    @mock.patch('jerakia.jerakia.json.loads', side_effect=(lambda x: x))
     def test_get_ok(self,mock_lookup,mock_json):
         """
         Test getting same dict response as expected from lookup
