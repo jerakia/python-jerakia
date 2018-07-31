@@ -11,11 +11,11 @@ class JerakiaTestCase(unittest.TestCase):
     
     def mocked_requests_get(self, *args, **kwargs):
         class MockResponse:
+            text = ''
             def __init__(self, json_data, status_code):
                 self.json_data = json_data
                 self.status_code = status_code
-            def json(self):
-                return self.json_data
+                MockResponse.text = str(json_data)
 
         return MockResponse({"found": "true","payload": "sto"}, 200)
 
