@@ -20,7 +20,7 @@ class JerakiaError(Error):
 
 class Jerakia(object):
     """Constructor."""
-    def __init__(self,configfile=None):
+    def __init__(self,configfile):
         if configfile is None:
             self.config = None
         else:

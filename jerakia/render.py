@@ -12,7 +12,8 @@ jerakia = Jerakia(None)
 def render(template_path, configfile_path, data, extensions=None, strict=False):
     """Renders a jinja2 template using data looked up via Jerakia"""
     
-    if jerakia.get_config is None:
+    global jerakia
+    if jerakia.get_config() is None:
         jerakia.set_config(configfile_path)
 
     if extensions is None:
@@ -34,6 +35,9 @@ def render(template_path, configfile_path, data, extensions=None, strict=False):
     return output.encode('utf-8')
 
 def retrieveJerakia(item):
+    """Retrieves the result from the Jerakia lookup"""
+
+    global jerakia
     lookuppath =item.split('/')
     key = lookuppath.pop()
     namespace = lookuppath
