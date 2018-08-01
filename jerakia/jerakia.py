@@ -32,8 +32,8 @@ class Jerakia(object):
     def get_config(self):
         return self.config
 
-    """Default coniguration"""
     def config_defaults(self):
+        """Default coniguration"""
         return { 
             'protocol': 'http',
             'host': '127.0.0.1',
@@ -42,16 +42,15 @@ class Jerakia(object):
             'policy': 'default'
         }
         
-    """Merge Jerakia coniguration"""
     def merge_dict(self, a, b):
+        """Merge Jerakia coniguration"""
         a = a.copy()
         a.update(b)
         return a
 
-    """Retrieve coniguration"""
     def combined_config(self, configfile):
+        """Retrieve coniguration"""
         defaults = self.config_defaults()
-
         if os.path.isfile(configfile):
             data = open(configfile, "r")
             defined_config = yaml.load(data)
@@ -60,8 +59,8 @@ class Jerakia(object):
         else:
             raise JerakiaError("Unable to find configuration file %s" % configfile)
 
-    """Lookup endpoint"""
     def lookup_endpoint_url(self, key=''):
+        """Lookup endpoint"""
         proto = self.config["protocol"]
         host = self.config['host']
         port = self.config['port']
@@ -69,8 +68,8 @@ class Jerakia(object):
         url = "%(proto)s://%(host)s:%(port)s/v%(version)s/lookup/%(key)s" % locals() 
         return url
 
-    """Scope definition"""
     def scope(self, variables):
+        """Scope definition"""
         scope_data = {}
         scope_conf = self.config['scope']
         if not self.config['scope']:
@@ -79,9 +78,9 @@ class Jerakia(object):
             metadata_entry = "metadata_%(key)s" % locals()
             scope_data[metadata_entry] = val
         return scope_data
-
-    """HTTP request header"""    
+    
     def headers(self):
+        """HTTP request header"""
         token = self.config['token']
         if not token:
             raise JerakiaError('No token configured for Jerakia')
@@ -90,8 +89,8 @@ class Jerakia(object):
             'X-Authentication': token
         }
 
-    """Lookup method"""
     def lookup(self, key, namespace, policy='default', variables=None):
+        """Lookup method"""
         endpoint_url = self.lookup_endpoint_url(key=key)
         namespace_str = '/'.join(namespace)
         scope = self.scope(variables)

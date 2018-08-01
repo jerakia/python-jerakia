@@ -11,7 +11,7 @@ jerakia = Jerakia(None)
 
 def render(template_path, configfile_path, data, extensions=None, strict=False):
     """Renders a jinja2 template using data looked up via Jerakia"""
-    
+
     global jerakia
     if jerakia.get_config() is None:
         jerakia.set_config(configfile_path)

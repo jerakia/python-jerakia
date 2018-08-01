@@ -5,11 +5,20 @@ from mock import patch
 from ..jerakia import Jerakia
 
 class JerakiaTestCase(unittest.TestCase):
+    """
+    Jerakia lookups tests case
+    """
 
     def setUp(self):
+        """
+        Method executed prior to the actual test
+        """
         self.jerakia = Jerakia(os.path.abspath('utils/jerakia.yaml'))
     
     def mocked_requests_get(self, *args, **kwargs):
+        """
+        Mock response of requests.get
+        """
         class MockResponse:
             text = ''
             def __init__(self, json_data, status_code):
@@ -21,7 +30,7 @@ class JerakiaTestCase(unittest.TestCase):
 
     @mock.patch('jerakia.jerakia.requests.get', side_effect=mocked_requests_get)
     @mock.patch('jerakia.jerakia.json.loads', side_effect=(lambda x: x))
-    def test_get_ok(self,mock_lookup,mock_json):
+    def test_lookup(self,mock_lookup,mock_json):
         """
         Test getting same dict response as expected from lookup
         """
