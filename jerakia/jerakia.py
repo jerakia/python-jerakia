@@ -105,6 +105,6 @@ class Jerakia(object):
 
         response = requests.get(endpoint_url, params=params, headers=headers)
         if response.status_code == requests.codes.ok:
-          return json.load(response.json())
+          return json.loads(response.text)
         else:
           raise JerakiaError("Bad HTTP response")

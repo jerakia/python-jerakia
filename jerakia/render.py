@@ -6,10 +6,20 @@ import sys
 import os
 from jinja2 import Environment, FileSystemLoader, Template
 from .jerakia import Jerakia,JerakiaError
+from jinja2.ext import Extension
 
 jerakia = Jerakia(None)
 
-def render(template_path, configfile_path, data, extensions=None, strict=False):
+class JerakiaExtension(Extension):
+    """Jinja2 extension for Jerakia lookups"""
+    def __init__(self, environment):
+        """Initialize the extension with the given environment."""
+        super(JerakiaExtension, self).__init__(environment)
+        # Add environ and lookup function globals
+        environment.globals['environ'] = os.environ.get
+        environment.globals['retrieveJerakia'] = retrieveJerakia
+
+def render(template_path, configfile_path, data, extensions=JerakiaExtension, strict=False):
     """Renders a jinja2 template using data looked up via Jerakia"""
     
     global jerakia
@@ -26,10 +36,6 @@ def render(template_path, configfile_path, data, extensions=None, strict=False):
     if strict:
         from jinja2 import StrictUndefined
         env.undefined = StrictUndefined
-
-    # Add environ and lookup function globals
-    env.globals['environ'] = os.environ.get
-    env.globals['retrieveJerakia'] = retrieveJerakia
 
     output = env.get_template(os.path.basename(template_path)).render(data)
     return output.encode('utf-8')
