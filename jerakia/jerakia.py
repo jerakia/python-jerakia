@@ -2,11 +2,13 @@ import yaml
 import os.path
 import requests
 import json
-
+import msgpack
+import pprint
 
 class Error(Exception):
     """Base class for exceptions in this module."""
     pass
+
 
 class JerakiaError(Error):
     """Exception raised for errors in the Jerakia lib.
@@ -18,92 +20,85 @@ class JerakiaError(Error):
     def __init__(self, message):
         self.message = message
 
+
 class Jerakia(object):
     """Constructor."""
-    def __init__(self,configfile):
-        if configfile is None:
-            self.config = None
-        else:
-            self.config = self.combined_config(configfile)
+    def __init__(self, **kwargs):
+        self.config = self.default_config()
+        for attr in ('protocol', 'host', 'port', 'version'):
+            if kwargs.get(attr) is not None:
+                self.config[attr] = kwargs.get(attr)
+        self._content_type = dict(json = 'application/json',
+                msgpack = 'application/x-msgpack')
+        self.session = requests.Session()
 
-    def set_config(self, configfile):
-        self.config=self.combined_config(configfile)
+
+    @classmethod
+    def fromfile(cls, configfile):
+        """Initialize jerakia object with a config file"""
+        if os.path.isfile(configfile):
+            with open(configfile, "r") as f:
+                config = yaml.load(f)
+        else:
+            raise JerakiaError("Unable to find configuration file {}".format(configfile))
+        return cls(**config)
+
+
+    def default_config(self):
+        """Set the jerakia default values"""
+        return dict(
+                protocol = 'http', 
+                host = 'localhost',
+                port = 9843,
+                version = 1 
+                )
     
+
     def get_config(self):
+        """Return the jerakia config dict"""
         return self.config
 
-    def config_defaults(self):
-        """Default coniguration"""
-        return { 
-            'protocol': 'http',
-            'host': '127.0.0.1',
-            'port': '9843',
-            'version': '1',
-            'policy': 'default'
-        }
+
+    def lookup(self, **kwargs):
+        url = '{}://{}:{}/v{}/lookup'.format(self.config['protocol'],
+                self.config['host'], self.config['port'],
+                self.config['version'])     
+
+        headers = dict()
+        headers['content-type'] = self._content_type['msgpack']
+        params = dict()
+        params['policy'] = 'default'
+        params['scope'] = 'metadata'
         
-    def merge_dict(self, a, b):
-        """Merge Jerakia coniguration"""
-        a = a.copy()
-        a.update(b)
-        return a
+        for attr in ('key', 'namespace', 'policy', 'lookup_type', 'merge', 'scope',
+                'scope_dict', 'metadata_dict', 'token', 'content_type'):
+            if kwargs.get(attr) is not None:
+                if attr == 'metadata_dict':
+                    for key, val in kwargs.get(attr).items():
+                        params['metadata_{}'.format(key)] = val
+                elif attr == 'scope_dict':
+                    for key, val in kwargs.get(attr).items():
+                        params['scope_{}'.key] = val
+                elif attr == 'key':
+                    url = "{}/{}".format(url, kwargs.get(attr))
+                elif attr == 'token':
+                    headers['x-authentication'] = kwargs.get(attr)
+                elif attr == 'content_type':
+                    headers['content-type'] = self._content_type[kwargs.get(attr)]
+                else:
+                    params[attr] = kwargs.get(attr)
+        try:
+            response = requests.get(url, params=params, headers=headers)
+            response.raise_for_status()
+        except requests.exceptions.HTTPError as err:
+            raise JerakiaError("Bad HTTP response: {}".format(err))
+        return self._unpack_response(response)
 
-    def combined_config(self, configfile):
-        """Retrieve coniguration"""
-        defaults = self.config_defaults()
-        if os.path.isfile(configfile):
-            data = open(configfile, "r")
-            defined_config = yaml.load(data)
-            combined_config = self.merge_dict(a=defaults,b=defined_config)
-            return combined_config
+
+    def _unpack_response(self, response):
+        if response.headers['content-type'] == self._content_type['json']:
+            return response.json()
+        elif response.headers['content-type'] == self._content_type['msgpack']:
+            return msgpack.unpackb(response.content)
         else:
-            raise JerakiaError("Unable to find configuration file %s" % configfile)
-
-    def lookup_endpoint_url(self, key=''):
-        """Lookup endpoint"""
-        proto = self.config["protocol"]
-        host = self.config['host']
-        port = self.config['port']
-        version = self.config['version']
-        url = "%(proto)s://%(host)s:%(port)s/v%(version)s/lookup/%(key)s" % locals() 
-        return url
-
-    def scope(self, variables):
-        """Scope definition"""
-        scope_data = {}
-        scope_conf = self.config['scope']
-        if not self.config['scope']:
-            return {}
-        for key, val in scope_conf.iteritems():
-            metadata_entry = "metadata_%(key)s" % locals()
-            scope_data[metadata_entry] = val
-        return scope_data
-    
-    def headers(self):
-        """HTTP request header"""
-        token = self.config['token']
-        if not token:
-            raise JerakiaError('No token configured for Jerakia')
-
-        return {
-            'X-Authentication': token
-        }
-
-    def lookup(self, key, namespace, policy='default', variables=None):
-        """Lookup method"""
-        endpoint_url = self.lookup_endpoint_url(key=key)
-        namespace_str = '/'.join(namespace)
-        scope = self.scope(variables)
-        options = { 
-            'namespace': namespace_str,
-            'policy': policy,
-        }
-
-        params = self.merge_dict(a=scope,b=options)
-        headers = self.headers()
-
-        response = requests.get(endpoint_url, params=params, headers=headers)
-        if response.status_code == requests.codes.ok:
-          return json.loads(response.text)
-        else:
-          raise JerakiaError("Bad HTTP response")
+            raise JerakiaError("Unkown content-type recieved from jerakia server: {}".format(response.headers['content-type']))
