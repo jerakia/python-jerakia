@@ -1,9 +1,14 @@
-import yaml
 import os.path
 import sys
 import requests
-import json
 import msgpack
+import yaml
+
+def merge_dicts(*dicts):
+    result = {}
+    for dictionary in dict_args:
+        result.update(dictionary)
+    return result
 
 class Error(Exception):
     """Base class for exceptions in this module."""
@@ -64,9 +69,9 @@ class Jerakia(object):
             None}
 
         if metadata_dict is not None:
-            params = {**params, **dict_attr(metadata_dict, 'metadata')}
+            params = merge_dicts(params, dict_attr(metadata_dict, 'metadata'))
         if scope_dict is not None:
-            params = {**params, **dict_attr(scope_dict, 'scope')}
+            params = merge_dicts(params, dict_attr(scope_dict, 'scope'))
 
         url = '{}://{}:{}/v{}/lookup'.format(
                 self.config['protocol'],
