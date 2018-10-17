@@ -6,9 +6,10 @@ import yaml
 
 def merge_dicts(*dicts):
     result = {}
-    for dictionary in dict_args:
+    for dictionary in dicts:
         result.update(dictionary)
     return result
+
 
 class Error(Exception):
     """Base class for exceptions in this module."""
@@ -30,8 +31,8 @@ class Jerakia(object):
     """Constructor."""
     def __init__(self, protocol='http', host='localhost', port=9843, version=1):
         self.config = dict(protocol=protocol, host=host, port=port, version=version)
-        self._content_type = dict(json = 'application/json',
-                msgpack = 'application/x-msgpack')
+        self._content_type = dict(json='application/json',
+                                  msgpack='application/x-msgpack')
         self.session = requests.Session()
 
 
@@ -39,8 +40,8 @@ class Jerakia(object):
     def fromfile(cls, configfile):
         """Initialize jerakia object with a config file"""
         if os.path.isfile(configfile):
-            with open(configfile, "r") as f:
-                config = yaml.load(f)
+            with open(configfile, "r") as filename:
+                config = yaml.load(filename)
         else:
             raise JerakiaError("Unable to find configuration file {}".format(configfile))
         return cls(**config)
@@ -51,9 +52,9 @@ class Jerakia(object):
         return self.config
 
 
-    def lookup(self, namespace, token, key=None,  merge=None, lookup_type=None,
-            content_type='msgpack', policy=None, scope=None, scope_dict=None,
-            metadata_dict=None):
+    def lookup(self, namespace, token, key=None, merge=None, lookup_type=None,
+               content_type='msgpack', policy=None, scope=None, scope_dict=None,
+               metadata_dict=None):
 
         def dict_attr(dictionary, prefix):
             target = dict()
@@ -62,11 +63,13 @@ class Jerakia(object):
             return target
 
         params = {k: v for k, v in (('namespace', namespace), ('merge', merge),
-            ('policy', policy), ('scope', scope), ('lookup_type', lookup_type))
-            if v is not None}
+                                    ('policy', policy), ('scope', scope),
+                                    ('lookup_type', lookup_type))
+                  if v is not None}
         headers = {k: v for k, v in (('x-authentication', token),
-            ('content-type', self._content_type[content_type])) if v is not
-            None}
+                                     ('content-type',
+                                      self._content_type[content_type]))
+                   if v is not None}
 
         if metadata_dict is not None:
             params = merge_dicts(params, dict_attr(metadata_dict, 'metadata'))
@@ -74,9 +77,9 @@ class Jerakia(object):
             params = merge_dicts(params, dict_attr(scope_dict, 'scope'))
 
         url = '{}://{}:{}/v{}/lookup'.format(
-                self.config['protocol'],
-                self.config['host'], self.config['port'],
-                self.config['version'])
+            self.config['protocol'],
+            self.config['host'], self.config['port'],
+            self.config['version'])
         if key is not None:
             url = "{}/{}".format(url, key)
 
@@ -97,4 +100,5 @@ class Jerakia(object):
         elif response.headers['content-type'] == self._content_type['msgpack']:
             return msgpack.unpackb(response.content)
         else:
-            raise JerakiaError("Unkown content-type recieved from jerakia server: {}".format(response.headers['content-type']))
+            raise JerakiaError("""Unkown content-type recieved from jerakia
+            server: {}""".format(response.headers['content-type']))
