@@ -9,6 +9,7 @@ setup(
     author='Jon Ander Novella',
     install_requires=[
         'requests>=2.0',
+        'msgpack',
         'mock',
         'jinja2',
         'pyaml',
