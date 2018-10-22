@@ -4,6 +4,7 @@ import requests
 import msgpack
 import yaml
 
+
 def merge_dicts(*dicts):
     result = {}
     for dictionary in dicts:
@@ -29,12 +30,13 @@ class JerakiaError(Error):
 
 class Jerakia(object):
     """Constructor."""
-    def __init__(self, protocol='http', host='localhost', port=9843, version=1):
-        self.config = dict(protocol=protocol, host=host, port=port, version=version)
+    def __init__(self, token, protocol='http', host='localhost', port=9843,
+                 version=1):
+        self.config = dict(token=token, protocol=protocol, host=host,
+                           port=port, version=version)
         self._content_type = dict(json='application/json',
                                   msgpack='application/x-msgpack')
         self.session = requests.Session()
-
 
     @classmethod
     def fromfile(cls, configfile):
@@ -43,18 +45,17 @@ class Jerakia(object):
             with open(configfile, "r") as filename:
                 config = yaml.load(filename)
         else:
-            raise JerakiaError("Unable to find configuration file {}".format(configfile))
+            raise JerakiaError("""Unable to find configuration file
+                    {}""".format(configfile))
         return cls(**config)
-
 
     def get_config(self):
         """Return the jerakia config dict"""
         return self.config
 
-
-    def lookup(self, namespace, token, key=None, merge=None, lookup_type=None,
-               content_type='msgpack', policy=None, scope=None, scope_dict=None,
-               metadata_dict=None):
+    def lookup(self, namespace, key=None, merge=None, lookup_type=None,
+               content_type='msgpack', policy=None, scope=None,
+               scope_dict=None, metadata_dict=None):
 
         def dict_attr(dictionary, prefix):
             target = dict()
@@ -66,7 +67,8 @@ class Jerakia(object):
                                     ('policy', policy), ('scope', scope),
                                     ('lookup_type', lookup_type))
                   if v is not None}
-        headers = {k: v for k, v in (('x-authentication', token),
+        headers = {k: v for k, v in (('x-authentication',
+                                      self.config['token']),
                                      ('content-type',
                                       self._content_type[content_type]))
                    if v is not None}
@@ -89,10 +91,10 @@ class Jerakia(object):
         except requests.exceptions.HTTPError as err:
             print("Bad HTTP response: {}".format(err))
             result = response.json()
-            print("Jerakia lookup {}: '{}'.".format(result['status'], result['message']))
+            print("Jerakia lookup {}: '{}'.".format(result['status'],
+                  result['message']))
             sys.exit(1)
         return self._unpack_response(response)
-
 
     def _unpack_response(self, response):
         if response.headers['content-type'] == self._content_type['json']:
