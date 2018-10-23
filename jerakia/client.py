@@ -17,7 +17,7 @@ class Error(Exception):
     pass
 
 
-class JerakiaError(Error):
+class ClientError(Error):
     """Exception raised for errors in the Jerakia lib.
 
     Attributes:
@@ -28,7 +28,7 @@ class JerakiaError(Error):
         self.message = message
 
 
-class Jerakia(object):
+class Client(object):
     """Constructor."""
     def __init__(self, token, protocol='http', host='localhost', port=9843,
                  version=1):
@@ -45,7 +45,7 @@ class Jerakia(object):
             with open(configfile, "r") as filename:
                 config = yaml.load(filename)
         else:
-            raise JerakiaError("""Unable to find configuration file
+            raise ClientError("""Unable to find configuration file
                     {}""".format(configfile))
         return cls(**config)
 
@@ -102,5 +102,5 @@ class Jerakia(object):
         elif response.headers['content-type'] == self._content_type['msgpack']:
             return msgpack.unpackb(response.content)
         else:
-            raise JerakiaError("""Unkown content-type header recieved from jerakia
+            raise ClientError("""Unkown content-type header recieved from jerakia
             server: {}""".format(response.headers['content-type']))
