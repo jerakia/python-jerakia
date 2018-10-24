@@ -49,10 +49,10 @@ def retrieveJerakia(item):
         try:
             return response['payload'].encode('ascii', 'ignore')
         except Exception as detail:
-            print 'The Jerakia lookup resulted in an empty response:', detail
+            print('The Jerakia lookup resulted in an empty response:', detail)
     else:
         try:
             [x.encode('ascii', 'ignore') for x in ret]
             return ret
         except Exception as detail:
-            print 'The Jerakia lookup resulted in an empty response:', detail
+            print('The Jerakia lookup resulted in an empty response:', detail)
