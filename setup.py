@@ -1,11 +1,11 @@
 from setuptools import setup,find_packages
 
 setup(
-    name='jerakia',
-    version='0.4.0',
+    name='python-jerakia',
+    version='0.5.0',
     packages=find_packages(),
     include_package_data=True,
-    description='Jerakia',
+    description='Python client library for Jerakia (https://jerakia.io)',
     author='Jon Ander Novella',
     install_requires=[
         'requests>=2.0',

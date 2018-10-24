@@ -5,10 +5,11 @@ import yaml
 import unittest
 import mock
 import msgpack
-from jerakia.jerakia import Jerakia
-from jerakia.render import render
+import jerakia
+from jerakia import render
 
-class TestJerakia(unittest.TestCase):
+
+class TestClient(unittest.TestCase):
 
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
@@ -36,7 +37,7 @@ class TestJerakia(unittest.TestCase):
         shutil.rmtree(self.test_dir)
 
     def test_default_config(self):
-        instance = Jerakia(self.token)
+        instance = jerakia.Client(self.token)
         self.assertIsNotNone(instance.config)
         for key in self.default_config.keys():
             self.assertEqual(instance.config[key], self.default_config[key])
@@ -46,7 +47,7 @@ class TestJerakia(unittest.TestCase):
         with open(config_file_path, 'w') as outfile:
             yaml.dump(self.file_config, outfile, default_flow_style=False)
 
-        instance = Jerakia.fromfile(config_file_path)
+        instance = jerakia.Client.fromfile(config_file_path)
         self.assertIsNotNone(instance.config)
         for key in self.default_config.keys():
             self.assertEqual(instance.config[key], self.file_config[key])
@@ -66,12 +67,12 @@ class TestJerakia(unittest.TestCase):
 
         return MockResponseJson({"found": "true","payload": "sesame"}, 200,'application/json')
 
-    @mock.patch('jerakia.jerakia.requests.get', side_effect=mocked_requests_get_json)
+    @mock.patch('jerakia.client.requests.get', side_effect=mocked_requests_get_json)
     def test_lookup_json(self,mock_lookup):
         """
         Test getting same dict response as expected from lookup using JSON
         """
-        instance = Jerakia(token=self.token)
+        instance = jerakia.Client(token=self.token)
         expected_dict = {
             "found": "true",
             "payload": "sesame"
@@ -95,12 +96,12 @@ class TestJerakia(unittest.TestCase):
 
         return MockResponseMsgpack(msgpack.packb({"found": "true","payload": "sesame"}, use_bin_type=True), 200,'application/x-msgpack')
 
-    @mock.patch('jerakia.jerakia.requests.get', side_effect=mocked_requests_get_msgpack)
+    @mock.patch('jerakia.client.requests.get', side_effect=mocked_requests_get_msgpack)
     def test_lookup_msgpack(self,mock_lookup):
         """
         Test getting same dict response as expected from lookup using JSON
         """
-        instance = Jerakia(token=self.token)
+        instance = jerakia.Client(token=self.token)
         expected_dict = {
             "found": "true",
             "payload": "sesame"
@@ -109,7 +110,7 @@ class TestJerakia(unittest.TestCase):
         # Check the contents of the response
         self.assertEqual(response_dict, expected_dict)
 
-    @mock.patch('jerakia.jerakia.requests.get', side_effect=mocked_requests_get_json)
+    @mock.patch('jerakia.client.requests.get', side_effect=mocked_requests_get_json)
     def test_render_json(self,mock_lookup):
         """
         Test render occurs successfully
@@ -118,11 +119,11 @@ class TestJerakia(unittest.TestCase):
         with open(config_file_path, 'w') as outfile:
             yaml.dump(self.render_file, outfile, default_flow_style=True)
 
-        instance = Jerakia(token=self.token)
+        instance = jerakia.Client(token=self.token)
 
         fields = {'it': 'common/test'}
         if 'it' in fields:
-            test_out = render(template_path=config_file_path, jerakia_instance=instance, data=fields)
+            test_out = render.render(template_path=config_file_path, jerakia_instance=instance, data=fields)
             self.assertIsNotNone(test_out)
             expected_test_out = '{' + "fieldA: 'sesame'" + ', ' + "fieldB: test" + '}'+ '\n'
             self.assertEqual(test_out, expected_test_out)
