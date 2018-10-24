@@ -6,9 +6,10 @@ import unittest
 import mock
 import msgpack
 import jerakia
+from jerakia import render
 
 
-class TestJerakia(unittest.TestCase):
+class TestClient(unittest.TestCase):
 
     def setUp(self):
         self.test_dir = tempfile.mkdtemp()
@@ -122,7 +123,7 @@ class TestJerakia(unittest.TestCase):
 
         fields = {'it': 'common/test'}
         if 'it' in fields:
-            test_out = render(template_path=config_file_path, jerakia_instance=instance, data=fields)
+            test_out = render.render(template_path=config_file_path, jerakia_instance=instance, data=fields)
             self.assertIsNotNone(test_out)
             expected_test_out = '{' + "fieldA: 'sesame'" + ', ' + "fieldB: test" + '}'+ '\n'
             self.assertEqual(test_out, expected_test_out)

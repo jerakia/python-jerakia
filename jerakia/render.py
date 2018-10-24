@@ -5,7 +5,7 @@ lib for rendering jinja templates using Jerakia lookups
 import sys
 import os
 from jinja2 import Environment, FileSystemLoader, Template
-from .jerakia import Jerakia,JerakiaError
+from .client import Client,ClientError
 from jinja2.ext import Extension
 
 jerakia = None
