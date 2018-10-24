@@ -102,5 +102,5 @@ class Jerakia(object):
         elif response.headers['content-type'] == self._content_type['msgpack']:
             return msgpack.unpackb(response.content)
         else:
-            raise JerakiaError("""Unkown content-type recieved from jerakia
+            raise JerakiaError("""Unkown content-type header recieved from jerakia
             server: {}""".format(response.headers['content-type']))
