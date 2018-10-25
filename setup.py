@@ -2,13 +2,14 @@ from setuptools import setup,find_packages
 
 setup(
     name='python-jerakia',
-    version='0.5.0',
+    version='0.5.1',
     packages=find_packages(),
     include_package_data=True,
     description='Python client library for Jerakia (https://jerakia.io)',
     author='Jon Ander Novella',
     install_requires=[
         'requests>=2.0',
+        'click>=6.7',
         'msgpack',
         'mock',
         'jinja2',
@@ -16,5 +17,12 @@ setup(
         'six',
         'cryptography>=2.2.1',
         'pyOpenSSL'
-    ]
+    ],
+    entry_points='''
+        [console_scripts]
+        jerakia=jerakia.cli:main
+    ''',
+    extras_require = {
+        'kcli':  ["kcli"]
+    }
 )
