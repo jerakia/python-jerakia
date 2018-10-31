@@ -36,11 +36,11 @@ def _load_yaml():
     import yaml
     return yaml.load, yaml.YAMLError, MalformedYAML
 
-def merge_dict(a, b):
-    """Merge Jerakia coniguration"""
-    a = a.copy()
-    a.update(b)
-    return a
+def merge_dicts(*dicts):
+    result = {}
+    for dictionary in dicts:
+        result.update(dictionary)
+    return result
 
 FORMATS = {
     'yaml': _load_yaml,
@@ -56,10 +56,10 @@ def main():
 @main.command()
 @click.argument('namespace')
 @click.argument('key')
-@click.option('-T','--token')
-@click.option('-P','--port')
+@click.option('-T','--token', required='true')
+@click.option('-P','--port', default='9843')
 @click.option('-t','--type')
-@click.option('-H','--host')
+@click.option('-H','--host', default='localhost')
 @click.option('--protocol', default='http')
 @click.option('-p','--policy')
 @click.option('-m', '--metadata')
@@ -71,8 +71,8 @@ def lookup(namespace,key,token,port,type,host,protocol,policy,metadata,configfil
     else:
         config  = dict()
     options_config = dict(token=token,port=port,host=host,version=1,protocol=protocol)
-    combined_config = merge_dict(a=config,b=options_config)         
-    jerakiaobj = Client(token=token)
+    combined_config = merge_dicts(config,options_config)
+    jerakiaobj = Client(**combined_config)
     ns = []
     ret = []
     ns.append(str(namespace))
