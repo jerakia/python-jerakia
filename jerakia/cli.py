@@ -56,7 +56,7 @@ def main():
 @main.command()
 @click.argument('namespace')
 @click.argument('key')
-@click.option('-T','--token', required='true')
+@click.option('-T','--token')
 @click.option('-P','--port', default='9843')
 @click.option('-t','--type')
 @click.option('-H','--host', default='localhost')
@@ -72,24 +72,28 @@ def lookup(namespace,key,token,port,type,host,protocol,policy,metadata,configfil
         config  = dict()
     options_config = dict(token=token,port=port,host=host,version=1,protocol=protocol)
     combined_config = merge_dicts(config,options_config)
-    jerakiaobj = Client(**combined_config)
-    ns = []
-    ret = []
-    ns.append(str(namespace))
-    response = jerakiaobj.lookup(key=str(key), namespace=ns, metadata_dict=metadata, content_type='json')
-    ret.append(response['payload'])
+    if (combined_config['token'] is not None):
+        jerakiaobj = Client(**combined_config)
+        ns = []
+        ret = []
+        ns.append(str(namespace))
+        response = jerakiaobj.lookup(key=str(key), namespace=ns, metadata_dict=metadata, content_type='json')
+        ret.append(response['payload'])
 
-    if len(ret) == 1:
-        try:
-            print ("Result outputs", response['payload'].encode('ascii', 'ignore'))
-        except Exception as detail:
-            print 'The Jerakia lookup resulted in an empty response:', detail
+        if len(ret) == 1:
+            try:
+                print ("Result outputs", response['payload'].encode('ascii', 'ignore'))
+            except Exception as detail:
+                print 'The Jerakia lookup resulted in an empty response:', detail
+        else:
+            try:
+                [x.encode('ascii', 'ignore') for x in ret]
+                print ("Result outputs ", ret)
+            except Exception as detail:
+                print 'The Jerakia lookup resulted in an empty response:', detail
     else:
-        try:
-            [x.encode('ascii', 'ignore') for x in ret]
-            print ("Result outputs ", ret)
-        except Exception as detail:
-            print 'The Jerakia lookup resulted in an empty response:', detail
+        print "Token was not provided. Lookup was aborted."
+        raise ClientError("""Token was not provided. Lookup was aborted.""")
 
 if __name__ == '__main__':
     greet(auto_envvar_prefix='JERAKIA')
