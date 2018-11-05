@@ -2,7 +2,7 @@ from setuptools import setup,find_packages
 
 setup(
     name='python-jerakia',
-    version='0.6.0',
+    version='0.6.8',
     packages=find_packages(),
     include_package_data=True,
     description='Python client library for Jerakia (https://jerakia.io)',
@@ -21,6 +21,8 @@ setup(
     entry_points='''
         [console_scripts]
         jerakia=jerakia.cli:main
+        [root.plugins]
+        plugin=jerakia.cli:main
     ''',
     extras_require = {
         'kcli':  ["kcli"]

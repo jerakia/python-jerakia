@@ -47,13 +47,10 @@ FORMATS = {
     'yml': _load_yaml,
 }
 
-
-@with_plugins(iter_entry_points('jerakia.plugins'))
 @click.group()
 def main():
     """jerakia is a tool to perform hierarchical data lookups."""
-
-@main.command()
+@main.command('lookup',short_help='Lookup command')
 @click.argument('namespace')
 @click.argument('key')
 @click.option('-T','--token')
@@ -72,6 +69,8 @@ def lookup(namespace,key,token,port,type,host,protocol,policy,metadata,configfil
         config  = dict()
     options_config = dict(token=token,port=port,host=host,version=1,protocol=protocol)
     combined_config = merge_dicts(config,options_config)
+    print options_config
+    print combined_config
     if (combined_config['token'] is not None):
         jerakiaobj = Client(**combined_config)
         ns = []
@@ -96,4 +95,4 @@ def lookup(namespace,key,token,port,type,host,protocol,policy,metadata,configfil
         raise ClientError("""Token was not provided. Lookup was aborted.""")
 
 if __name__ == '__main__':
-    greet(auto_envvar_prefix='JERAKIA')
+    lookup(auto_envvar_prefix='JERAKIA')
