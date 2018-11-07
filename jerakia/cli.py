@@ -59,22 +59,30 @@ def main():
 @click.option('--protocol', default='http', envvar='JERAKIA_PROTOCOL')
 @click.option('-t','--type')
 @click.option('-p','--policy')
-@click.option('-m', '--metadata')
+@click.option('-m','--metadata',required=False, multiple=True)
 @click.option('-i', '--configfile', type=click.Path(), default='$HOME/.jerakia/jerakia.yaml')
 def lookup(namespace,key,token,port,type,host,protocol,policy,metadata,configfile):
+    # Parse metadata options
+    met = dict()
+    for item in metadata:
+        met.update([item.split(':')])
+    # Load configfile if exists
     if os.path.exists(configfile):
         with open(configfile, "r") as filename:
             config = yaml.load(filename)
+    # Merge dicts from cli args/env vars with config file
     else:
         config  = dict()
     options_config = dict(token=token,port=port,host=host,version=1,protocol=protocol)
     combined_config = merge_dicts(config,options_config)
+
+    # Perform lookup
     if (combined_config['token'] is not None):
         jerakiaobj = Client(**combined_config)
         ns = []
         ret = []
         ns.append(str(namespace))
-        response = jerakiaobj.lookup(key=str(key), namespace=ns, metadata_dict=metadata, content_type='json')
+        response = jerakiaobj.lookup(key=str(key), namespace=ns, metadata_dict=met, content_type='json')
         ret.append(response['payload'])
 
         if len(ret) == 1:
