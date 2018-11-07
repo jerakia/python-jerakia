@@ -50,14 +50,14 @@ FORMATS = {
 @click.group()
 def main():
     """jerakia is a tool to perform hierarchical data lookups."""
-@main.command('lookup',short_help='Lookup command')
+@main.command('lookup')
 @click.argument('namespace')
 @click.argument('key')
-@click.option('-T','--token')
-@click.option('-P','--port', default='9843')
+@click.option('-T','--token', envvar='JERAKIA_TOKEN')
+@click.option('-P','--port', default='9843', envvar='JERAKIA_PORT')
+@click.option('-H','--host', default='localhost', envvar='JERAKIA_HOST')
+@click.option('--protocol', default='http', envvar='JERAKIA_PROTOCOL')
 @click.option('-t','--type')
-@click.option('-H','--host', default='localhost')
-@click.option('--protocol', default='http')
 @click.option('-p','--policy')
 @click.option('-m', '--metadata')
 @click.option('-i', '--configfile', type=click.Path(), default='$HOME/.jerakia/jerakia.yaml')
@@ -69,8 +69,6 @@ def lookup(namespace,key,token,port,type,host,protocol,policy,metadata,configfil
         config  = dict()
     options_config = dict(token=token,port=port,host=host,version=1,protocol=protocol)
     combined_config = merge_dicts(config,options_config)
-    print options_config
-    print combined_config
     if (combined_config['token'] is not None):
         jerakiaobj = Client(**combined_config)
         ns = []
@@ -91,8 +89,4 @@ def lookup(namespace,key,token,port,type,host,protocol,policy,metadata,configfil
             except Exception as detail:
                 print 'The Jerakia lookup resulted in an empty response:', detail
     else:
-        print "Token was not provided. Lookup was aborted."
-        raise ClientError("""Token was not provided. Lookup was aborted.""")
-
-if __name__ == '__main__':
-    lookup(auto_envvar_prefix='JERAKIA')
+        print "Token not found in env var JERAKIA_TOKEN, aborting"
