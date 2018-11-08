@@ -65,7 +65,7 @@ def lookup(namespace,key,token,port,type,host,protocol,policy,metadata,configfil
     # Parse metadata options
     met = dict()
     for item in metadata:
-        met.update([item.split(':')])
+        met.update([item.split('=')])
     # Load configfile if exists
     if os.path.exists(configfile):
         with open(configfile, "r") as filename:
