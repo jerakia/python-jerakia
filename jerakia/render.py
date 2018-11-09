@@ -9,12 +9,15 @@ from .client import Client,ClientError
 from jinja2.ext import Extension
 
 jerakia = None
+metadata = None
 
-def render(template_path, jerakia_instance, data, extensions=None, strict=False):
+def render(template_path, jerakia_instance, metadata_dict, data, extensions=None, strict=False):
     """Renders a jinja2 template using data looked up via Jerakia"""
 
     global jerakia
     jerakia = jerakia_instance
+    global metadata
+    metadata = metadata_dict
 
     if extensions is None:
         extensions = []
@@ -37,12 +40,13 @@ def retrieveJerakia(item):
     """Retrieves the result from the Jerakia lookup"""
 
     global jerakia
+    global metadata
     
     lookuppath =item.split('/')
     key = lookuppath.pop()
     namespace = lookuppath
     ret = []
-    response = jerakia.lookup(key=key, namespace=namespace, content_type='json')
+    response = jerakia.lookup(key=key, namespace=namespace, metadata_dict=metadata, content_type='json')
     ret.append(response['payload'])
 
     if len(ret) == 1:
