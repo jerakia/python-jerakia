@@ -123,7 +123,7 @@ class TestClient(unittest.TestCase):
 
         fields = {'it': 'common/test'}
         if 'it' in fields:
-            test_out = render.render(template_path=config_file_path, jerakia_instance=instance, metadata_dict=dict(env: 'dev'), data=fields)
+            test_out = render.render(template_path=config_file_path, jerakia_instance=instance, metadata_dict=dict(env='dev'), data=fields)
             self.assertIsNotNone(test_out)
             expected_test_out = '{' + "fieldA: 'sesame'" + ', ' + "fieldB: test" + '}'+ '\n'
             self.assertEqual(test_out, expected_test_out)
