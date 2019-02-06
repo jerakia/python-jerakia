@@ -10,6 +10,7 @@ setup(
     install_requires=[
         'requests>=2.0',
         'click>=6.7',
+        'click-plugins',
         'msgpack',
         'mock',
         'jinja2',
